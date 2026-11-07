@@ -146,6 +146,17 @@
       box-shadow: 0 0 14px rgba(250, 204, 21, 0.85);
       z-index: 10;
     }
+        /* Caps Lock 開啟時顯示綠色燈號 */
+    .kb-key.kb-caps-active {
+      background: linear-gradient(180deg, #dcfce7 0%, #bbf7d0 100%) !important;
+      border-color: #16a34a !important;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.7);
+    }
+    .kb-key.kb-caps-active .kb-led {
+      background-color: #16a34a !important;
+      box-shadow: 0 0 8px #22c55e, 0 0 14px #4ade80;
+      height: 5px;
+    }
     .kb-key.kb-pressed .kb-led {
       background-color: #16a34a !important;
       box-shadow: 0 0 8px #22c55e, 0 0 14px #4ade80;
@@ -1547,6 +1558,7 @@
       }
     });
 
+    window.addEventListener('mousedown', checkCapsLockState);
     window.addEventListener('keyup', (e) => {
       checkCapsLockState(e);
       const matchedEls = findKeyElementsForEvent(e);
@@ -1590,7 +1602,11 @@
             if (kbVal === 'Shift' || kbVal === 'ShiftRight') {
               document.getElementById('coachMessage').textContent = '💡 在實體鍵盤上，左手按住【Shift】不放再按上排【2】，就能打出小老鼠「@」喔！';
             } else if (kbVal === 'CapsLock') {
-              document.getElementById('coachMessage').textContent = '💡【Caps Lock】是大寫鎖定鍵，打帳密時請保持關閉（燈不亮），這樣打出來的英文才會是小寫喔！';
+              manualCapsLockState = !manualCapsLockState;
+              applyCapsLockVisual(manualCapsLockState);
+              document.getElementById('coachMessage').textContent = manualCapsLockState
+                ? '🟢【Caps Lock 大寫燈目前已亮綠燈（開啟）】提醒：打帳密時請再按一下 Caps Lock 關閉綠燈，英文才會是小寫喔！'
+                : '💡【Caps Lock 大寫燈目前已關閉】打帳密時請保持大寫燈不亮，這樣打出來的英文才會是小寫喔！';
             }
             inputEl.focus();
             return;
@@ -1742,21 +1758,40 @@
         .replace(/"/g, '&quot;');
     }
 
-    function checkCapsLockState(e) {
-      if (typeof e.getModifierState === 'function') {
-        const isCaps = e.getModifierState('CapsLock');
-        const badge = document.getElementById('capsLockBadge');
-        const hwLedCaps = document.getElementById('hwLedCaps');
-        const capsKey = document.querySelector('.kb-key[data-kb="CapsLock"]');
-        if (isCaps) {
-          badge.classList.remove('hidden');
-          if (hwLedCaps) hwLedCaps.className = 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444] transition-all';
-          if (capsKey) capsKey.classList.add('kb-pressed-error');
-        } else {
-          badge.classList.add('hidden');
-          if (hwLedCaps) hwLedCaps.className = 'w-2.5 h-2.5 rounded-full bg-slate-700 transition-all';
-          if (capsKey) capsKey.classList.remove('kb-pressed-error');
+    let manualCapsLockState = false;
+    function applyCapsLockVisual(isCaps) {
+      const badge = document.getElementById('capsLockBadge');
+      const hwLedCaps = document.getElementById('hwLedCaps');
+      const capsKey = document.querySelector('.kb-key[data-kb="CapsLock"]');
+      if (isCaps) {
+        badge.classList.remove('hidden');
+        if (hwLedCaps) {
+          hwLedCaps.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#4ade80] transition-all';
+          hwLedCaps.style.backgroundColor = '#22c55e';
+          hwLedCaps.style.boxShadow = '0 0 8px #4ade80, 0 0 12px #22c55e';
         }
+        if (capsKey) {
+          capsKey.classList.remove('kb-pressed-error');
+          capsKey.classList.add('kb-caps-active');
+        }
+      } else {
+        badge.classList.add('hidden');
+        if (hwLedCaps) {
+          hwLedCaps.className = 'w-2.5 h-2.5 rounded-full bg-slate-700 transition-all';
+          hwLedCaps.style.backgroundColor = '';
+          hwLedCaps.style.boxShadow = '';
+        }
+        if (capsKey) {
+          capsKey.classList.remove('kb-pressed-error', 'kb-caps-active');
+        }
+      }
+    }
+
+    function checkCapsLockState(e) {
+      if (e && typeof e.getModifierState === 'function') {
+        const isCaps = e.getModifierState('CapsLock');
+        manualCapsLockState = isCaps;
+        applyCapsLockVisual(isCaps);
       }
     }
 
