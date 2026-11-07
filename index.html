@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>甲圍國小｜學生教育雲端帳密＆鍵盤亮燈練習</title>
+  <title>甲圍國小學生教育雲端帳密練習介面</title>
   
   
   
@@ -204,6 +204,10 @@
     .w-8 { width: 2rem; }
     .w-11 { width: 2.75rem; }
     .w-16 { width: 4rem; }
+    .w-2 { width: 0.5rem; }
+    .h-2 { height: 0.5rem; }
+    .pl-2 { padding-left: 0.5rem; }
+    .whitespace-nowrap { white-space: nowrap; }
     .w-2\.5, .w-2\.5 { width: 0.625rem; }
     .w-3 { width: 0.75rem; }
     .w-4 { width: 1rem; }
@@ -449,6 +453,7 @@
     .text-blue-700 { color: #1d4ed8; }
     .text-purple-700 { color: #7e22ce; }
     .text-emerald-50 { color: #ecfdf5; }
+    .text-emerald-300 { color: #6ee7b7; }
     .text-emerald-700 { color: #047857; }
     .text-emerald-800 { color: #065f46; }
     .text-emerald-900 { color: #064e3b; }
@@ -840,35 +845,39 @@
 
       <!-- STEP 2: Interactive Physical Keyboard with Top LED Indicator Lights (On the exact same page right below input table!) -->
       <div id="keyboard-section" role="region" aria-label="互動式實體鍵盤亮燈導引區" class="kb-shell rounded-xl p-2.5 sm:p-3 text-white space-y-2">
-        <!-- Keyboard Top Status & LED Legend Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
-          <div class="flex flex-wrap items-center gap-3">
+        <!-- Keyboard Top Status & LED Legend Bar (Compact Single Row) -->
+        <div class="flex items-center justify-between gap-2 px-1 text-[11px] whitespace-nowrap overflow-x-auto">
+          <div class="flex items-center gap-2 shrink-0">
             <a href="#keyboard-section" accesskey="B" title="下方互動鍵盤與字母對照區 (Alt+B)" class="accesskey-brick !text-slate-300 hover:!text-slate-900">:::</a>
-            <span class="font-black text-amber-300 flex items-center gap-1.5">
+            <span class="font-black text-amber-300 flex items-center gap-1">
               <span>⌨️</span>
-              <span>互動實體鍵盤（按鍵上方會亮燈，也可直接用滑鼠點按輸入）</span>
+              <span>互動實體鍵盤（按鍵上方會亮燈，也可滑鼠點按）</span>
             </span>
             <span class="inline-flex items-center gap-1 text-slate-300">
-              <span class="w-3 h-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8] inline-block"></span>
-              <span>藍燈＝下一個建議按的鍵</span>
+              <span class="w-2.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8] inline-block"></span>
+              <span>藍燈＝建議按鍵</span>
             </span>
             <span class="inline-flex items-center gap-1 text-slate-300">
-              <span class="w-3 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#4ade80] inline-block"></span>
-              <span>綠燈＋黃鍵＝你正在按的鍵</span>
+              <span class="w-2.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#4ade80] inline-block"></span>
+              <span>綠燈＝正在按的鍵</span>
             </span>
           </div>
 
-          <!-- Top-Right Hardware Indicator LEDs (like a real keyboard: Num / Caps / Active Key) -->
-          <div class="flex items-center gap-3 bg-slate-900/90 border border-slate-700 px-3 py-1 rounded-lg">
-            <div class="flex items-center gap-1.5">
-              <span id="hwLedCaps" class="w-2.5 h-2.5 rounded-full bg-slate-700 transition-all"></span>
+          <!-- Top-Right Hardware Indicator LEDs (Caps Lock + IME Mode + Active Key) -->
+          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700 px-2.5 py-0.5 rounded-lg shrink-0 text-[11px]">
+            <div class="flex items-center gap-1" title="開啟大寫時亮綠燈；打帳密時請保持關閉">
+              <span id="hwLedCaps" class="w-2 h-2 rounded-full bg-slate-700 transition-all"></span>
               <span class="text-[11px] font-bold text-slate-300">Caps Lock (大寫燈)</span>
             </div>
-            <div class="flex items-center gap-1.5 border-l border-slate-700 pl-3">
-              <span id="hwLedKey" class="w-2.5 h-2.5 rounded-full bg-slate-700 transition-all"></span>
-              <span id="lastPressedKeyDisplay" class="text-xs sm:text-sm font-bold text-amber-300 school-font">等待按鍵...</span>
+            <div class="flex items-center gap-1 border-l border-slate-700 pl-2" role="status" aria-live="polite" title="偵測打字時為英語(ENG)或中文(注音)輸入模式">
+              <span id="hwLedIme" class="w-2 h-2 rounded-full bg-slate-700 transition-all"></span>
+              <span id="imeModeDisplay" class="text-[11px] font-bold text-slate-300">輸入法：按鍵即偵測</span>
             </div>
-            <div id="nextKeyPromptBadge" class="hidden sm:flex items-center gap-1 border-l border-slate-700 pl-3 text-xs sm:text-sm font-bold text-sky-300">
+            <div class="flex items-center gap-1 border-l border-slate-700 pl-2">
+              <span id="hwLedKey" class="w-2 h-2 rounded-full bg-slate-700 transition-all"></span>
+              <span id="lastPressedKeyDisplay" class="text-[11px] font-bold text-amber-300 school-font">等待按鍵...</span>
+            </div>
+            <div id="nextKeyPromptBadge" class="hidden sm:flex items-center gap-1 border-l border-slate-700 pl-2 text-[11px] font-bold text-sky-300">
               <span>👉 下一個鍵：</span>
               <span id="nextKeyText" class="px-1.5 py-0.2 bg-sky-900/80 border border-sky-400 rounded text-white school-font">點選輸入框</span>
             </div>
@@ -1526,9 +1535,63 @@
       setTimeout(() => el.classList.remove(cls), 320);
     }
 
+    // --- Live IME Mode (英語 ENG vs 中文注音) Detection Engine ---
+    function updateImeIndicator(mode) {
+      const led = document.getElementById('hwLedIme');
+      const text = document.getElementById('imeModeDisplay');
+      const shiftKey = document.querySelector('.kb-key[data-kb="Shift"]');
+      if (!led || !text) return;
+
+      if (mode === 'zh') {
+        led.className = 'w-2 h-2 rounded-full bg-rose-500 transition-all animate-pulse';
+        led.style.backgroundColor = '#ef4444';
+        led.style.boxShadow = '0 0 8px #ef4444, 0 0 12px #f87171';
+        text.className = 'text-[11px] font-black text-amber-300';
+        text.textContent = '⚠️ 輸入法：中文(請按Shift切英數)';
+        if (shiftKey) shiftKey.classList.add('kb-pressed-error');
+        document.getElementById('coachMessage').textContent = '⚠️ 偵測到你目前是【中文（注音）輸入模式】！請按一下鍵盤左邊的【Shift】鍵（或 Ctrl+空白鍵）切換成「英數 ENG」喔！';
+      } else if (mode === 'en') {
+        led.className = 'w-2 h-2 rounded-full bg-emerald-400 transition-all';
+        led.style.backgroundColor = '#22c55e';
+        led.style.boxShadow = '0 0 8px #4ade80, 0 0 12px #22c55e';
+        text.className = 'text-[11px] font-bold text-emerald-300';
+        text.textContent = '🟢 輸入法：英語 (ENG)';
+        if (shiftKey) shiftKey.classList.remove('kb-pressed-error');
+      } else if (mode === 'shift-toggled') {
+        led.className = 'w-2 h-2 rounded-full bg-amber-300 transition-all';
+        led.style.backgroundColor = '#fbbf24';
+        led.style.boxShadow = '0 0 8px #fbbf24';
+        text.className = 'text-[11px] font-bold text-amber-300';
+        text.textContent = '🔄 已按 Shift (請打字測試)';
+        if (shiftKey) shiftKey.classList.remove('kb-pressed-error');
+      }
+    }
+
+    window.addEventListener('compositionstart', () => {
+      updateImeIndicator('zh');
+      playTone('error');
+    });
+    window.addEventListener('compositionupdate', () => {
+      updateImeIndicator('zh');
+    });
+
     // Global Physical Keyboard Listener so ANY key press lights up the top LED on the visual keyboard
+    let shiftPressedAlone = false;
     window.addEventListener('keydown', (e) => {
       checkCapsLockState(e);
+
+      // Detect IME composition (keyCode 229 / isComposing / Bopomofo characters)
+      if (e.isComposing || e.keyCode === 229 || e.key === 'Process' || /^[\u3105-\u3129\u02CA\u02C7\u02CB\u02D9]$/.test(e.key)) {
+        shiftPressedAlone = false;
+        updateImeIndicator('zh');
+      } else if (e.key === 'Shift') {
+        shiftPressedAlone = true;
+      } else {
+        shiftPressedAlone = false;
+        if (e.key && e.key.length === 1 && /^[\x20-\x7E]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          updateImeIndicator('en');
+        }
+      }
       const matchedEls = findKeyElementsForEvent(e);
       matchedEls.forEach(el => {
         el.classList.add('kb-pressed');
@@ -1561,6 +1624,13 @@
     window.addEventListener('mousedown', checkCapsLockState);
     window.addEventListener('keyup', (e) => {
       checkCapsLockState(e);
+      if (e.key === 'Shift' && shiftPressedAlone) {
+        shiftPressedAlone = false;
+        const text = document.getElementById('imeModeDisplay');
+        if (text && text.textContent.includes('中文')) {
+          updateImeIndicator('shift-toggled');
+        }
+      }
       const matchedEls = findKeyElementsForEvent(e);
       matchedEls.forEach(el => {
         el.classList.remove('kb-pressed', 'kb-pressed-error');
