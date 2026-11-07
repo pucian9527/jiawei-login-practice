@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>甲圍國小｜學生教育雲端帳密＆鍵盤亮燈練習</title>
+  <title>甲圍國小學生教育雲端帳密練習介面</title>
   
   
   
@@ -1755,13 +1755,13 @@
               <span>${cfg.label}</span>
             </div>
 
-            <!-- Reference Target Display in Elementary Textbook Font -->
-            <div class="flex items-center justify-between px-2.5 py-1 rounded-lg bg-slate-100/90 border border-slate-200/80">
-              <span class="text-xs font-bold text-slate-600">範例</span>
-              <div id="ref-${cfg.id}" class="school-font text-base sm:text-lg font-bold text-slate-900 select-all tracking-wide ${showReferenceAnswer ? '' : 'blur-sm select-none'}">
+            <!-- Reference Target Display in Elementary Textbook Font (Unselectable & Anti-Copy) -->
+            <div class="flex items-center justify-between px-2.5 py-1 rounded-lg bg-slate-100/90 border border-slate-200/80 select-none" style="user-select: none; -webkit-user-select: none;">
+              <span class="text-xs font-bold text-slate-600 select-none">範例</span>
+              <div id="ref-${cfg.id}" class="school-font text-base sm:text-lg font-bold text-slate-900 select-none tracking-wide ${showReferenceAnswer ? '' : 'blur-sm'}" style="user-select: none; -webkit-user-select: none;">
                 ${escapeHtml(cfg.target)}
               </div>
-              <span class="text-xs font-bold text-slate-600">${cfg.target.length}字</span>
+              <span class="text-xs font-bold text-slate-600 select-none">${cfg.target.length}字</span>
             </div>
 
             <!-- Student Input Box with WCAG Explicit Label & ARIA -->
@@ -1788,12 +1788,30 @@
             <!-- Character-by-character live diff boxes -->
             <div id="diff-${cfg.id}" aria-hidden="true" class="flex flex-wrap items-center justify-center bg-slate-50 rounded-lg p-1.5 border border-dashed border-slate-200 min-h-[2.1rem]"></div>
 
-            <!-- Specific Error / Position Diagnostic Message (Enlarged + Screen Reader Live Region) -->
-            <div id="msg-${cfg.id}" role="status" aria-live="polite" class="text-sm sm:text-base font-bold rounded-lg px-2.5 py-1.5 hidden leading-snug"></div>
+            <!-- Specific Error / Position Diagnostic Message (Enlarged + Screen Reader Live Region, Anti-Copy) -->
+            <div id="msg-${cfg.id}" role="status" aria-live="polite" class="text-sm sm:text-base font-bold rounded-lg px-2.5 py-1.5 hidden leading-snug select-none" style="user-select: none; -webkit-user-select: none;"></div>
           </div>
         `;
 
         const inputEl = document.getElementById(`input-${cfg.id}`);
+        inputEl.addEventListener('copy', (e) => {
+          // Only allow copying from a practice input if the student has typed at least 3 correct characters
+          if ((inputEl.value || '').trim().length >= 3) {
+            window._allowedPracticeClipboard = inputEl.value;
+          }
+        });
+        inputEl.addEventListener('paste', (e) => {
+          const pasted = (e.clipboardData || window.clipboardData).getData('text');
+          if (!window._allowedPracticeClipboard || pasted.trim() !== window._allowedPracticeClipboard.trim()) {
+            e.preventDefault();
+            playTone('error');
+            document.getElementById('coachMessage').textContent = '🙅‍♂️ 不能直接複製範例或從外面貼上喔！請先在練習格自己親手打對一格，才能用 Ctrl+C 複製到其他格！';
+            return;
+          }
+        });
+        inputEl.addEventListener('drop', (e) => {
+          e.preventDefault();
+        });
         inputEl.addEventListener('input', (e) => {
           activeFieldId = cfg.id;
           userInputs[cfg.id] = e.target.value;
@@ -2278,6 +2296,7 @@
     });
 
     function resetAllInputs(customCoachMsg) {
+      window._allowedPracticeClipboard = '';
       const configs = getFieldConfigs();
       configs.forEach(cfg => {
         userInputs[cfg.id] = '';
@@ -2486,6 +2505,18 @@
         } else {
           btn.setAttribute('aria-label', `鍵盤按鍵 ${kbVal}`);
         }
+      });
+            // Block copying from anywhere outside the 8 practice input boxes (e.g. reference text, hint text, modal)
+      document.addEventListener('copy', (ev) => {
+        const active = document.activeElement;
+        if (!active || !active.id || !active.id.startsWith('input-')) {
+          ev.preventDefault();
+          playTone('error');
+          document.getElementById('coachMessage').textContent = '🙅‍♂️ 範例文字不能複製喔！請自己動手敲鍵盤輸入練習！';
+        }
+      });
+      document.addEventListener('dragstart', (ev) => {
+        ev.preventDefault();
       });
       renderAlphabetTable();
       setupVirtualKeyboardClicks();
