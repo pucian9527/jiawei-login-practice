@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>甲圍國小學生教育雲端帳密練習介面</title>
+  <title>甲圍國小｜學生教育雲端帳密＆鍵盤亮燈練習</title>
   
   
   
@@ -199,6 +199,9 @@
     /* ====== 離線版核心工具類別 (Utility Classes) ====== */
     .max-w-7xl { max-width: 80rem; }
     .max-w-xl { max-width: 36rem; }
+    .max-w-md { max-width: 28rem; }
+    .p-6 { padding: 1.5rem; }
+    .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
     .max-w-full { max-width: 100%; }
     .w-full { width: 100%; }
     .w-8 { width: 2rem; }
@@ -1199,6 +1202,19 @@
     </div>
   </div>
 
+  <!-- 3-Second Auto-Close Anti-Copy/Paste Popup Modal -->
+  <div id="antiCheatPopupModal" role="alertdialog" aria-modal="true" aria-labelledby="antiCheatPopupText" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-rose-500 text-center space-y-3">
+      <div class="text-4xl leading-none" aria-hidden="true">🙅‍♂️</div>
+      <p id="antiCheatPopupText" class="text-base sm:text-lg font-black text-rose-800 leading-relaxed">
+        🙅‍♂️ 不能直接複製範例或從外面貼上喔！請先在練習格自己親手打對一格，才能用 Ctrl+C 複製到其他格！
+      </p>
+      <div class="text-xs font-bold text-slate-500 pt-1">
+        （此提示視窗將於 3 秒後自動關閉）
+      </div>
+    </div>
+  </div>
+
   <script>
     // --- Student Profile & State (Starts Empty; Step 1 is Custom Student Input) ---
     let isProfileConfigured = false;
@@ -1694,6 +1710,25 @@
       });
     }
 
+    // --- 3-Second Auto-Close Anti-Cheat Popup Modal ---
+    let antiCheatPopupTimer = null;
+    function showAntiCheatPopup(msg) {
+      const modal = document.getElementById('antiCheatPopupModal');
+      const textEl = document.getElementById('antiCheatPopupText');
+      if (!modal || !textEl) return;
+      textEl.textContent = msg || '🙅‍♂️ 不能直接複製範例或從外面貼上喔！請先在練習格自己親手打對一格，才能用 Ctrl+C 複製到其他格！';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (antiCheatPopupTimer) {
+        clearTimeout(antiCheatPopupTimer);
+      }
+      antiCheatPopupTimer = setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        antiCheatPopupTimer = null;
+      }, 3000);
+    }
+
     // --- Render Worksheet Cells ---
     function renderWorksheet() {
       document.getElementById('metaYear').textContent = currentProfile.year || '___';
@@ -1805,7 +1840,7 @@
           if (!window._allowedPracticeClipboard || pasted.trim() !== window._allowedPracticeClipboard.trim()) {
             e.preventDefault();
             playTone('error');
-            document.getElementById('coachMessage').textContent = '🙅‍♂️ 不能直接複製範例或從外面貼上喔！請先在練習格自己親手打對一格，才能用 Ctrl+C 複製到其他格！';
+            showAntiCheatPopup('🙅‍♂️ 不能直接複製範例或從外面貼上喔！請先在練習格自己親手打對一格，才能用 Ctrl+C 複製到其他格！');
             return;
           }
         });
@@ -2512,7 +2547,7 @@
         if (!active || !active.id || !active.id.startsWith('input-')) {
           ev.preventDefault();
           playTone('error');
-          document.getElementById('coachMessage').textContent = '🙅‍♂️ 範例文字不能複製喔！請自己動手敲鍵盤輸入練習！';
+          showAntiCheatPopup('🙅‍♂️ 不能直接複製範例或從外面貼上喔！請先在練習格自己親手打對一格，才能用 Ctrl+C 複製到其他格！');
         }
       });
       document.addEventListener('dragstart', (ev) => {
